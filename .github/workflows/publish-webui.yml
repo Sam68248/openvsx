@@ -47,7 +47,7 @@ jobs:
             if [[ "${VERSION}" != "${PROJECT_VERSION}" ]]; then
               echo "Project version '${PROJECT_VERSION}' does not match version from tag '${VERSION}'."
               exit 1
-            fi    
+            fi
           fi
   npm-publish:
     name: "Publish to npm"
@@ -59,13 +59,11 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: '24.x'
           package-manager-cache: false
           registry-url: 'https://registry.npmjs.org'
-
       - name: Install Yarn
         working-directory: webui
         run: |
@@ -76,7 +74,9 @@ jobs:
         env:
           VERSION: ${{ needs.prepare.outputs.release-version }}
         run: |
-          yarn install
+          # remove root level package.json to avoid workspaces madness
+          rm ../package.json
+          yarn install --immutable
           npm version ${VERSION} --allow-same-version
           yarn run prepare
       - name: Publish
